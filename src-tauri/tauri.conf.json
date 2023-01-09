@@ -13,6 +13,9 @@
   "tauri": {
     "allowlist": {
       "all": false,
+      "dialog": {
+        "all": true
+      },
       "shell": {
         "all": false,
         "open": true
@@ -33,7 +36,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "com.ytdl-tauri.inaridiy",
       "longDescription": "",
       "macOS": {
         "entitlements": null,

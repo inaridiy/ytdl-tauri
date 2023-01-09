@@ -1,33 +1,31 @@
 <script>
-  import Greet from "$lib/Greet.svelte";
+  import { save } from "@tauri-apps/api/dialog";
+  import { invoke } from "@tauri-apps/api/tauri";
+
+  let url = "";
+
+  function handleClick() {
+    invoke("video_info", {
+      url,
+    }).then((res) => {
+      console.log(res);
+    });
+    save({ title: "Save Video", defaultPath: "inari.mp4" }).then((path) => {
+      console.log(path);
+    });
+  }
 </script>
 
-<h1>Welcome to Tauri!</h1>
-
-<div class="row">
-  <a href="https://vitejs.dev" target="_blank">
-    <img src="/vite.svg" class="logo vite" alt="Vite Logo" />
-  </a>
-  <a href="https://tauri.app" target="_blank">
-    <img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
-  </a>
-  <a href="https://kit.svelte.dev" target="_blank">
-    <img src="/svelte.svg" class="logo svelte" alt="Svelte Logo" />
-  </a>
-</div>
-
-<p>Click on the Tauri, Vite, and Svelte logos to learn more.</p>
-
-<div class="row">
-  <Greet />
-</div>
-
-<style>
-  .logo.vite:hover {
-    filter: drop-shadow(0 0 2em #747bff);
-  }
-
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00);
-  }
-</style>
+<main
+  class="w-screen h-screen bg-slate-200 flex justify-center items-center flex-col gap-2"
+>
+  <h1 class="text-3xl font-bold">JUST Download Youtube</h1>
+  <div class="flex w-full max-w-md gap-2">
+    <input
+      class="input input-bordered w-full"
+      placeholder="Youtube URL"
+      bind:value={url}
+    />
+    <button class="btn" on:click={handleClick}>Download</button>
+  </div>
+</main>
