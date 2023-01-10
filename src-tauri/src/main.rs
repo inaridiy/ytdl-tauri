@@ -2,9 +2,8 @@
     all(not(debug_assertions), target_os = "windows"),
     windows_subsystem = "windows"
 )]
-use rustube::Id;
-use rustube::VideoDetails;
-use rustube::VideoFetcher;
+
+use rustube::*;
 use std::sync::Arc;
 
 #[tauri::command]
@@ -35,9 +34,31 @@ async fn video_info(url: &str) -> Result<Arc<VideoDetails>, ()> {
     return Result::Ok(video_info.player_response.video_details.clone());
 }
 
+#[tauri::command]
+async fn download_video(url: &str, path: &str) -> Result<(), ()> {
+    let id = Id::from_raw(url).expect("REASON");
+    let video = Video::from_id(id.into_owned()).await.expect("REASON");
+    println!("Start Download Video To {}", path);
+    video
+        .best_quality()
+        .unwrap()
+        .download_to(path)
+        .await
+        .expect("REASON");
+
+    println!("Downloaded video to {}", path);
+
+    return Result::Ok(());
+}
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet, get_version, video_info])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            get_version,
+            video_info,
+            download_video
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

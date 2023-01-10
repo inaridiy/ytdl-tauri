@@ -1,18 +1,34 @@
-<script>
+<script lang="ts">
   import { save } from "@tauri-apps/api/dialog";
   import { invoke } from "@tauri-apps/api/tauri";
 
   let url = "";
+  let loading = false;
+  let errMsg = "";
 
-  function handleClick() {
-    invoke("video_info", {
-      url,
-    }).then((res) => {
-      console.log(res);
-    });
-    save({ title: "Save Video", defaultPath: "inari.mp4" }).then((path) => {
-      console.log(path);
-    });
+  type VideoInfo = {
+    title: string;
+  };
+
+  async function handleClick() {
+    try {
+      loading = true;
+      if (!url) return;
+      const { title } = await invoke<Partial<VideoInfo>>("video_info", {
+        url,
+      }).catch(() => ({ title: undefined }));
+      if (!title) return (errMsg = "Video Not Found");
+      const path = await save({
+        title: "Save Video",
+        defaultPath: `${title.replace(/[\\\/:\*\?\"<>\|]/g, ".")}.mp4`,
+      });
+
+      if (!path) return (errMsg = "No path selected");
+
+      await invoke("download_video", { url, path });
+    } finally {
+      loading = false;
+    }
   }
 </script>
 
@@ -26,6 +42,13 @@
       placeholder="Youtube URL"
       bind:value={url}
     />
-    <button class="btn" on:click={handleClick}>Download</button>
+    <button
+      class={loading ? "loading btn" : "btn"}
+      disabled={loading}
+      on:click={handleClick}>Download</button
+    >
   </div>
+  {#if errMsg}
+    <p class="text-error font-bold">{errMsg}</p>
+  {/if}
 </main>
